@@ -1,0 +1,82 @@
+syntax = "proto3";
+
+package proto;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "github.com/sosshik/foxminded/task-4.1/cmd/internal/proto";
+
+
+message UUID {
+    string value = 1;
+}
+
+message UserInfo{
+    UUID oid = 1;
+    string nickname = 2;
+    string email = 3;
+    string first_name = 4;
+    string last_name = 5;
+}
+
+message CreateUserRequest {
+    UserInfo user = 1;
+    string password = 2;
+}
+
+message CreateUserResponse {
+    UUID oid = 1;
+}
+
+message GetUserByEmailRequest {
+    string email = 1;
+}
+
+message GetUserByEmailResponse {
+    UserInfo user = 1;
+}
+
+message GetUserByIDRequest {
+    UUID oid = 1;
+}
+
+message GetUserByIDResponse {
+    UserInfo user = 1;
+}
+
+
+message GetUsersResponse {
+    repeated UserInfo users = 1;
+}
+
+message UpdateUserRequest {
+    UserInfo user = 1;
+}
+
+message UpdateUserResponse {
+    bool isOk = 1;
+}
+
+message DeleteUserRequest {
+    UUID oid = 1;
+}
+
+message DeleteUserResponse {
+    bool isOk = 1;
+}
+
+service UserService {
+
+    rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+
+    rpc GetUserByEmail(GetUserByEmailRequest) returns (GetUserByEmailResponse);
+
+    rpc GetUserByID(GetUserByIDRequest) returns (GetUserByIDResponse);
+
+    rpc GetUsers(google.protobuf.Empty) returns (GetUsersResponse);
+
+    rpc UpdateUser(UpdateUserRequest) returns (UpdateUserResponse);
+
+    rpc DeleteUser(DeleteUserRequest) returns (DeleteUserResponse);
+
+}
