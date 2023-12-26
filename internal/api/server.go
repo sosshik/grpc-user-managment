@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 	"unicode"
 
 	"git.foxminded.ua/foxstudent106264/task-4.1/internal/domain"
@@ -21,9 +20,9 @@ type ServerAPI struct {
 }
 
 func (s *ServerAPI) CreateUser(ctx context.Context, req *proto.CreateUserRequest) (*proto.CreateUserResponse, error) {
-	inputUser := req.GetUser()
+	user := req.GetUser()
 
-	if err := CheckPassword(req.GetPassword()); err != nil {
+	if err := сheckPassword(req.GetPassword()); err != nil {
 		return &proto.CreateUserResponse{}, fmt.Errorf("CreateUser: %w", err)
 	}
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.GetPassword()), bcrypt.DefaultCost)
@@ -32,27 +31,17 @@ func (s *ServerAPI) CreateUser(ctx context.Context, req *proto.CreateUserRequest
 		return &proto.CreateUserResponse{}, fmt.Errorf("CreateUser - unable to generate hash for password: %w", err)
 	}
 
-	user := domain.UserProfileDTO{
-		OID:       uuid.New(),
-		Nickname:  inputUser.Nickname,
-		Email:     inputUser.Email,
-		FirstName: inputUser.FirstName,
-		LastName:  inputUser.LastName,
-		Password:  string(hash),
-		CreatedAt: time.Now().UTC(),
-		UpdatedAt: time.Now().UTC(),
-		State:     domain.Active,
-	}
+	user.Oid.Value = uuid.New().String()
 
-	crErr := s.DB.CreateUser(user)
-	if crErr != nil {
+	err = s.DB.CreateUser(user, string(hash), domain.Active)
+	if err != nil {
 		log.Warnf("CreateUser: %s", err)
-		return &proto.CreateUserResponse{}, fmt.Errorf("CreateUser: %w", err)
+		return &proto.CreateUserResponse{}, fmt.Errorf("CreateUser2: %w", err)
 	}
 
 	log.Infof("Successfully created user %s", user.Nickname)
 	return &proto.CreateUserResponse{
-		Oid: &proto.UUID{Value: user.OID.String()},
+		Oid: &proto.UUID{Value: user.Oid.Value},
 	}, nil
 }
 
@@ -64,13 +53,7 @@ func (s *ServerAPI) GetUserByEmail(ctx context.Context, req *proto.GetUserByEmai
 	}
 
 	return &proto.GetUserByEmailResponse{
-		User: &proto.UserInfo{
-			Oid:       &proto.UUID{Value: user.OID.String()},
-			Nickname:  user.Nickname,
-			Email:     user.Email,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-		},
+		User: user,
 	}, nil
 }
 
@@ -87,13 +70,7 @@ func (s *ServerAPI) GetUserByID(ctx context.Context, req *proto.GetUserByIDReque
 	}
 
 	return &proto.GetUserByIDResponse{
-		User: &proto.UserInfo{
-			Oid:       &proto.UUID{Value: user.OID.String()},
-			Nickname:  user.Nickname,
-			Email:     user.Email,
-			FirstName: user.FirstName,
-			LastName:  user.LastName,
-		},
+		User: user,
 	}, nil
 }
 func (s *ServerAPI) GetUsers(ctx context.Context, req *emptypb.Empty) (*proto.GetUsersResponse, error) {
@@ -110,21 +87,9 @@ func (s *ServerAPI) GetUsers(ctx context.Context, req *emptypb.Empty) (*proto.Ge
 }
 func (s *ServerAPI) UpdateUser(ctx context.Context, req *proto.UpdateUserRequest) (*proto.UpdateUserResponse, error) {
 
-	grpcUser := req.GetUser()
-	oid, err := uuid.Parse(grpcUser.Oid.GetValue())
-	if err != nil {
-		log.Warnf("DeleteUser: unable to parse uuid:%s", err)
-		return &proto.UpdateUserResponse{IsOk: false}, fmt.Errorf("DeleteUser: %w", err)
-	}
-	user := domain.UserProfileDTO{
-		OID:       oid,
-		Nickname:  grpcUser.GetNickname(),
-		Email:     grpcUser.GetEmail(),
-		FirstName: grpcUser.GetFirstName(),
-		LastName:  grpcUser.GetLastName(),
-	}
+	user := req.GetUser()
 
-	err = s.DB.UpdateUser(user)
+	err := s.DB.UpdateUser(user)
 	if err != nil {
 		log.Warnf("UpdateUser:%s", err)
 		return &proto.UpdateUserResponse{IsOk: false}, fmt.Errorf("UpdateUser: %w", err)
@@ -148,7 +113,7 @@ func (s *ServerAPI) DeleteUser(ctx context.Context, req *proto.DeleteUserRequest
 	return &proto.DeleteUserResponse{IsOk: true}, nil
 }
 
-func CheckPassword(psw string) error {
+func сheckPassword(psw string) error {
 
 	if len(psw) < 8 {
 

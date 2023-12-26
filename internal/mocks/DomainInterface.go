@@ -16,13 +16,13 @@ type DomainInterface struct {
 	mock.Mock
 }
 
-// CreateUser provides a mock function with given fields: user
-func (_m *DomainInterface) CreateUser(user domain.UserProfileDTO) error {
-	ret := _m.Called(user)
+// CreateUser provides a mock function with given fields: user, pass, state
+func (_m *DomainInterface) CreateUser(user *proto.UserInfo, pass string, state domain.State) error {
+	ret := _m.Called(user, pass, state)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(domain.UserProfileDTO) error); ok {
-		r0 = rf(user)
+	if rf, ok := ret.Get(0).(func(*proto.UserInfo, string, domain.State) error); ok {
+		r0 = rf(user, pass, state)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -45,18 +45,20 @@ func (_m *DomainInterface) DeleteUser(oid uuid.UUID) error {
 }
 
 // GetUserByEmail provides a mock function with given fields: email
-func (_m *DomainInterface) GetUserByEmail(email string) (domain.UserProfileDTO, error) {
+func (_m *DomainInterface) GetUserByEmail(email string) (*proto.UserInfo, error) {
 	ret := _m.Called(email)
 
-	var r0 domain.UserProfileDTO
+	var r0 *proto.UserInfo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (domain.UserProfileDTO, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (*proto.UserInfo, error)); ok {
 		return rf(email)
 	}
-	if rf, ok := ret.Get(0).(func(string) domain.UserProfileDTO); ok {
+	if rf, ok := ret.Get(0).(func(string) *proto.UserInfo); ok {
 		r0 = rf(email)
 	} else {
-		r0 = ret.Get(0).(domain.UserProfileDTO)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*proto.UserInfo)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(string) error); ok {
@@ -68,23 +70,25 @@ func (_m *DomainInterface) GetUserByEmail(email string) (domain.UserProfileDTO, 
 	return r0, r1
 }
 
-// GetUserByID provides a mock function with given fields: userID
-func (_m *DomainInterface) GetUserByID(userID uuid.UUID) (domain.UserProfileDTO, error) {
-	ret := _m.Called(userID)
+// GetUserByID provides a mock function with given fields: oid
+func (_m *DomainInterface) GetUserByID(oid uuid.UUID) (*proto.UserInfo, error) {
+	ret := _m.Called(oid)
 
-	var r0 domain.UserProfileDTO
+	var r0 *proto.UserInfo
 	var r1 error
-	if rf, ok := ret.Get(0).(func(uuid.UUID) (domain.UserProfileDTO, error)); ok {
-		return rf(userID)
+	if rf, ok := ret.Get(0).(func(uuid.UUID) (*proto.UserInfo, error)); ok {
+		return rf(oid)
 	}
-	if rf, ok := ret.Get(0).(func(uuid.UUID) domain.UserProfileDTO); ok {
-		r0 = rf(userID)
+	if rf, ok := ret.Get(0).(func(uuid.UUID) *proto.UserInfo); ok {
+		r0 = rf(oid)
 	} else {
-		r0 = ret.Get(0).(domain.UserProfileDTO)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*proto.UserInfo)
+		}
 	}
 
 	if rf, ok := ret.Get(1).(func(uuid.UUID) error); ok {
-		r1 = rf(userID)
+		r1 = rf(oid)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -119,11 +123,11 @@ func (_m *DomainInterface) GetUsers() ([]*proto.UserInfo, error) {
 }
 
 // UpdateUser provides a mock function with given fields: user
-func (_m *DomainInterface) UpdateUser(user domain.UserProfileDTO) error {
+func (_m *DomainInterface) UpdateUser(user *proto.UserInfo) error {
 	ret := _m.Called(user)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(domain.UserProfileDTO) error); ok {
+	if rf, ok := ret.Get(0).(func(*proto.UserInfo) error); ok {
 		r0 = rf(user)
 	} else {
 		r0 = ret.Error(0)

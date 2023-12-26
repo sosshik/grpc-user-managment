@@ -8,7 +8,6 @@ import (
 	"reflect"
 	"testing"
 
-	"git.foxminded.ua/foxstudent106264/task-4.1/internal/domain"
 	"git.foxminded.ua/foxstudent106264/task-4.1/internal/mocks"
 	proto "git.foxminded.ua/foxstudent106264/task-4.1/protos/gen/go/user_service"
 	"github.com/google/uuid"
@@ -25,6 +24,7 @@ func TestServerAPI_CreateUser(t *testing.T) {
 			Email:     "test@example.com",
 			FirstName: "test",
 			LastName:  "test",
+			Oid:       &proto.UUID{Value: ""},
 		},
 		Password: "Test123.",
 	}
@@ -34,6 +34,7 @@ func TestServerAPI_CreateUser(t *testing.T) {
 			Email:     "test@example.com",
 			FirstName: "test",
 			LastName:  "test",
+			Oid:       &proto.UUID{Value: ""},
 		},
 		Password: "Test12",
 	}
@@ -43,6 +44,7 @@ func TestServerAPI_CreateUser(t *testing.T) {
 			Email:     "test@example.com",
 			FirstName: "test",
 			LastName:  "test",
+			Oid:       &proto.UUID{Value: ""},
 		},
 		Password: "Test123.",
 	}
@@ -68,7 +70,7 @@ func TestServerAPI_CreateUser(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.needsMock {
-				mockDB.On("CreateUser", mock.AnythingOfType("domain.UserProfileDTO")).Return(tt.mockErr).Once()
+				mockDB.On("CreateUser", mock.Anything, mock.Anything, mock.Anything).Return(tt.mockErr).Once()
 			}
 
 			_, err := tt.s.CreateUser(tt.args.ctx, tt.args.req)
@@ -96,7 +98,7 @@ func TestServerAPI_GetUserByEmail(t *testing.T) {
 		name     string
 		s        *ServerAPI
 		args     args
-		mockResp domain.UserProfileDTO
+		mockResp *proto.UserInfo
 		mockErr  error
 		want     *proto.GetUserByEmailResponse
 		wantErr  bool
@@ -105,8 +107,8 @@ func TestServerAPI_GetUserByEmail(t *testing.T) {
 			name: "No Error",
 			s:    &s,
 			args: args{ctx: context.Background(), req: req},
-			mockResp: domain.UserProfileDTO{
-				OID:       oid,
+			mockResp: &proto.UserInfo{
+				Oid:       &proto.UUID{Value: oid.String()},
 				Nickname:  "test",
 				Email:     "test@example.com",
 				FirstName: "test",
@@ -128,7 +130,7 @@ func TestServerAPI_GetUserByEmail(t *testing.T) {
 			name:     "Error",
 			s:        &s,
 			args:     args{ctx: context.Background(), req: req},
-			mockResp: domain.UserProfileDTO{},
+			mockResp: &proto.UserInfo{},
 			mockErr:  errors.New("error"),
 			want:     &proto.GetUserByEmailResponse{},
 			wantErr:  true,
@@ -168,7 +170,7 @@ func TestServerAPI_GetUserByID(t *testing.T) {
 		name     string
 		s        *ServerAPI
 		args     args
-		mockResp domain.UserProfileDTO
+		mockResp *proto.UserInfo
 		mockErr  error
 		want     *proto.GetUserByIDResponse
 		wantErr  bool
@@ -177,8 +179,8 @@ func TestServerAPI_GetUserByID(t *testing.T) {
 			name: "No Error",
 			s:    &s,
 			args: args{ctx: context.Background(), req: req},
-			mockResp: domain.UserProfileDTO{
-				OID:       oid,
+			mockResp: &proto.UserInfo{
+				Oid:       &proto.UUID{Value: oid.String()},
 				Nickname:  "test",
 				Email:     "test@example.com",
 				FirstName: "test",
@@ -200,7 +202,7 @@ func TestServerAPI_GetUserByID(t *testing.T) {
 			name:     "Error",
 			s:        &s,
 			args:     args{ctx: context.Background(), req: req},
-			mockResp: domain.UserProfileDTO{},
+			mockResp: &proto.UserInfo{},
 			mockErr:  errors.New("error"),
 			want:     &proto.GetUserByIDResponse{},
 			wantErr:  true,
@@ -242,7 +244,7 @@ func TestServerAPI_GetUsers(t *testing.T) {
 		wantErr  bool
 	}{
 		{
-			name: "No Error",
+			name: "Positive case",
 			s:    &s,
 			args: args{ctx: context.Background(), req: &emptypb.Empty{}},
 			mockResp: []*proto.UserInfo{
@@ -269,7 +271,7 @@ func TestServerAPI_GetUsers(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name:     "No Error",
+			name:     "Negative case",
 			s:        &s,
 			args:     args{ctx: context.Background(), req: &emptypb.Empty{}},
 			mockResp: []*proto.UserInfo{},
@@ -313,15 +315,6 @@ func TestServerAPI_UpdateUser(t *testing.T) {
 	}
 	req2 := &proto.UpdateUserRequest{
 		User: &proto.UserInfo{
-			Oid:       &proto.UUID{Value: "oid"},
-			Nickname:  "test",
-			Email:     "test@example.com",
-			FirstName: "test",
-			LastName:  "test",
-		},
-	}
-	req3 := &proto.UpdateUserRequest{
-		User: &proto.UserInfo{
 			Oid:       &proto.UUID{Value: oid},
 			Nickname:  "test",
 			Email:     "test@example.com",
@@ -356,18 +349,9 @@ func TestServerAPI_UpdateUser(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "Wrong OID case",
-			s:    &s,
-			args: args{ctx: context.Background(), req: req2},
-			want: &proto.UpdateUserResponse{
-				IsOk: false,
-			},
-			wantErr: true,
-		},
-		{
 			name:      "DB error case",
 			s:         &s,
-			args:      args{ctx: context.Background(), req: req3},
+			args:      args{ctx: context.Background(), req: req2},
 			needsMock: true,
 			mockErr:   errors.New("error"),
 			want: &proto.UpdateUserResponse{

@@ -78,38 +78,38 @@ func (d *Database) connectionCheck(conn string) {
 	}
 }
 
-func (d *Database) CreateUser(user domain.UserProfileDTO) error {
-
+func (d *Database) CreateUser(user *proto.UserInfo, pass string, state domain.State) error {
+	t := time.Now().UTC()
 	_, err := d.DB.Exec(`
 	INSERT INTO users (oid, nickname, email, first_name, last_name, password, created_at, updated_at, state)
 	VALUES ($1, $2, $3, $4, $5, $6, $7,$8, $9);
-	`, user.OID, user.Nickname, user.Email, user.FirstName, user.LastName, user.Password, user.CreatedAt, user.UpdatedAt, user.State)
+	`, user.Oid.GetValue(), user.Nickname, user.Email, user.FirstName, user.LastName, pass, t, t, state)
 	if err != nil {
 		return fmt.Errorf("unable to execute query to DB: %w", err)
 	}
 	return nil
 }
 
-func (d *Database) GetUserByEmail(email string) (domain.UserProfileDTO, error) {
-	var user domain.UserProfileDTO
+func (d *Database) GetUserByEmail(email string) (*proto.UserInfo, error) {
+	user := &proto.UserInfo{Oid: &proto.UUID{}}
 	err := d.DB.QueryRow(`
 	SELECT oid, nickname, email, first_name, last_name FROM users
 	WHERE email = $1;
-	`, email).Scan(&user.OID, &user.Nickname, &user.Email, &user.FirstName, &user.LastName)
+	`, email).Scan(&user.Oid.Value, &user.Nickname, &user.Email, &user.FirstName, &user.LastName)
 	if err != nil && err != sql.ErrNoRows {
-		return domain.UserProfileDTO{}, fmt.Errorf("unable to execute query to DB: %w", err)
+		return &proto.UserInfo{}, fmt.Errorf("unable to execute query to DB: %w", err)
 	}
 	return user, nil
 }
 
-func (d *Database) GetUserByID(oid uuid.UUID) (domain.UserProfileDTO, error) {
-	var user domain.UserProfileDTO
+func (d *Database) GetUserByID(oid uuid.UUID) (*proto.UserInfo, error) {
+	user := &proto.UserInfo{Oid: &proto.UUID{}}
 	err := d.DB.QueryRow(`
 	SELECT oid, nickname, email, first_name, last_name FROM users
 	WHERE oid = $1;
-	`, oid).Scan(&user.OID, &user.Nickname, &user.Email, &user.FirstName, &user.LastName)
+	`, oid).Scan(&user.Oid.Value, &user.Nickname, &user.Email, &user.FirstName, &user.LastName)
 	if err != nil && err != sql.ErrNoRows {
-		return domain.UserProfileDTO{}, fmt.Errorf("unable to execute query to DB: %w", err)
+		return &proto.UserInfo{}, fmt.Errorf("unable to execute query to DB: %w", err)
 	}
 	return user, nil
 }
@@ -127,14 +127,14 @@ func (d *Database) GetUsers() ([]*proto.UserInfo, error) {
 	var users []*proto.UserInfo
 
 	for rows.Next() {
-		var user domain.UserProfileDTO
-		err := rows.Scan(&user.OID, &user.Nickname, &user.Email, &user.FirstName, &user.LastName)
+		user := &proto.UserInfo{Oid: &proto.UUID{}}
+		err := rows.Scan(&user.Oid.Value, &user.Nickname, &user.Email, &user.FirstName, &user.LastName)
 		if err != nil {
 			return []*proto.UserInfo{}, fmt.Errorf("unable to scan row from DB: %w", err)
 		}
 
 		users = append(users, &proto.UserInfo{
-			Oid:       &proto.UUID{Value: user.OID.String()},
+			Oid:       &proto.UUID{Value: user.Oid.Value},
 			Email:     user.Email,
 			Nickname:  user.Nickname,
 			FirstName: user.FirstName,
@@ -144,13 +144,18 @@ func (d *Database) GetUsers() ([]*proto.UserInfo, error) {
 	return users, nil
 }
 
-func (d *Database) UpdateUser(user domain.UserProfileDTO) error {
+func (d *Database) UpdateUser(user *proto.UserInfo) error {
 
-	_, err := d.DB.Exec(`
+	oid, err := uuid.Parse(user.Oid.GetValue())
+	if err != nil {
+		return fmt.Errorf("unable to parse uuid: %w", err)
+	}
+
+	_, err = d.DB.Exec(`
 	UPDATE users
 	SET nickname=$1, email = $2, first_name=$3, last_name=$4, updated_at=$5
 	WHERE oid=$6;
-	`, user.Nickname, user.Email, user.FirstName, user.LastName, time.Now().UTC(), user.OID)
+	`, user.Nickname, user.Email, user.FirstName, user.LastName, time.Now().UTC(), oid)
 	if err != nil {
 		return fmt.Errorf("unable to execute query to DB: %w", err)
 	}

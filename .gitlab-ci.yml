@@ -1,0 +1,20 @@
+stages:
+  - test
+
+test: 
+  stage: test
+  image: golang:latest
+  script: 
+    - go test -v ./...
+    - go vet ./...
+    - go install honnef.co/go/tools/cmd/staticcheck@latest
+    - staticcheck ./...
+    - go install github.com/securego/gosec/v2/cmd/gosec@latest
+    - gosec -exclude=G102 ./...
+
+test:golangci-lint:
+  stage: test
+  image: golangci/golangci-lint:v1.55.2
+  script:
+    - golangci-lint run -v
+    

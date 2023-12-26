@@ -14,13 +14,15 @@ import (
 	"google.golang.org/grpc"
 )
 
+var cfg *config.Config
+
 func init() {
 	err := godotenv.Load()
 	if err != nil {
 		log.Warn("No .env file")
 	}
 
-	cfg := config.GetConfig()
+	cfg = config.GetConfig()
 
 	level, err := log.ParseLevel(cfg.LogLevel)
 	if err != nil {
@@ -36,7 +38,6 @@ func init() {
 	fmt.Printf("config initialized\n")
 }
 func main() {
-	cfg := config.GetConfig()
 
 	db, err := database.NewDatabase(cfg)
 	if err != nil {
