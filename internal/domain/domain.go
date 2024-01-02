@@ -1,8 +1,8 @@
 package domain
 
 import (
-	proto "git.foxminded.ua/foxstudent106264/task-4.1/protos/gen/go/user_service"
 	"github.com/google/uuid"
+	proto "github.com/sosshik/grpc-user-managment/protos/gen/go/user_service"
 )
 
 type Role int

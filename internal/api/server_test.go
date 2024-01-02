@@ -8,9 +8,9 @@ import (
 	"reflect"
 	"testing"
 
-	"git.foxminded.ua/foxstudent106264/task-4.1/internal/mocks"
-	proto "git.foxminded.ua/foxstudent106264/task-4.1/protos/gen/go/user_service"
 	"github.com/google/uuid"
+	"github.com/sosshik/grpc-user-managment/internal/mocks"
+	proto "github.com/sosshik/grpc-user-managment/protos/gen/go/user_service"
 	"github.com/stretchr/testify/mock"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )

@@ -1,4 +1,4 @@
-module git.foxminded.ua/foxstudent106264/task-4.1
+module github.com/sosshik/grpc-user-managment
 
 go 1.21.0
 

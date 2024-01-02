@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"unicode"
 
-	"git.foxminded.ua/foxstudent106264/task-4.1/internal/domain"
-	proto "git.foxminded.ua/foxstudent106264/task-4.1/protos/gen/go/user_service"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"github.com/sosshik/grpc-user-managment/internal/domain"
+	proto "github.com/sosshik/grpc-user-managment/protos/gen/go/user_service"
 	"golang.org/x/crypto/bcrypt"
 	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )

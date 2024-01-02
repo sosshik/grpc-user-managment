@@ -3,10 +3,10 @@
 package mocks
 
 import (
-	domain "git.foxminded.ua/foxstudent106264/task-4.1/internal/domain"
+	domain "github.com/sosshik/grpc-user-managment/internal/domain"
 	mock "github.com/stretchr/testify/mock"
 
-	proto "git.foxminded.ua/foxstudent106264/task-4.1/protos/gen/go/user_service"
+	proto "github.com/sosshik/grpc-user-managment/protos/gen/go/user_service"
 
 	uuid "github.com/google/uuid"
 )

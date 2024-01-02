@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
-	"git.foxminded.ua/foxstudent106264/task-4.1/internal/domain"
-	"git.foxminded.ua/foxstudent106264/task-4.1/pkg/config"
-	proto "git.foxminded.ua/foxstudent106264/task-4.1/protos/gen/go/user_service"
 	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
+	"github.com/sosshik/grpc-user-managment/internal/domain"
+	"github.com/sosshik/grpc-user-managment/pkg/config"
+	proto "github.com/sosshik/grpc-user-managment/protos/gen/go/user_service"
 )
 
 type DBConfig struct {

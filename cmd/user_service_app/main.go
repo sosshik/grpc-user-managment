@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"net"
 
-	"git.foxminded.ua/foxstudent106264/task-4.1/internal/api"
-	"git.foxminded.ua/foxstudent106264/task-4.1/internal/database"
-	"git.foxminded.ua/foxstudent106264/task-4.1/pkg/config"
-	proto "git.foxminded.ua/foxstudent106264/task-4.1/protos/gen/go/user_service"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
+	"github.com/sosshik/grpc-user-managment/internal/api"
+	"github.com/sosshik/grpc-user-managment/internal/database"
+	"github.com/sosshik/grpc-user-managment/pkg/config"
+	proto "github.com/sosshik/grpc-user-managment/protos/gen/go/user_service"
 	"google.golang.org/grpc"
 )
 

@@ -2,7 +2,6 @@
 
 ## Overview
 
-This is my solution to problem **4.1 User management: grpc**.
 This project implements a gRPC user service with the following features:
 - Create user
 - Get user by email
@@ -16,9 +15,9 @@ This project implements a gRPC user service with the following features:
 
 Clone the repo: 
 
-    git clone https://git.foxminded.ua/foxstudent106264/task-4.1.git
+    git clone https://github.com/sosshik/grpc-user-managment.git
 
-Create `.env` file in cmd directory with parameters: 
+Create `.env` file in cmd/user_service_app directory with parameters: 
 - `PORT` - port where you wish to start the bot
 - `DATABASE_URL` - your MongoDB connection string
 - `CONN_CHECK` - use true or false to enable connection check
